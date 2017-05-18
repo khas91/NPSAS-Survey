@@ -1,473 +1,573 @@
-﻿IF OBJECT_ID ('tempdb..#FSCJ_ENROLL') IS NOT NULL
-	DROP TABLE #FSCJ_ENROLL
-
-SELECT  
-	STUDENT_ID
-	,MIN([effTrm]) AS FIRST_TERM
-	,MAX([effTrm]) AS LAST_TERM
-INTO 
-	#FSCJ_ENROLL
-FROM 
-	[MIS].[dbo].[ST_ACDMC_HIST_A_154] 
-WHERE 
-	LEFT(CLASS_KEY,1) NOT IN ('B', 'M') 
-	AND [effTrm] != ''
-GROUP BY 
-	STUDENT_ID
-
-IF OBJECT_ID ('tempdb..#FSCJ_SCLS') IS NOT NULL
-	DROP TABLE #FSCJ_SCLS
-
-SELECT 
-	DISTINCT STDNT_ID AS STUDENT_ID
-	,'20163' AS FIRST_TERM
-	,'20163' AS LAST_TERM
-INTO 
-	#FSCJ_SCLS
-FROM 
-	[MIS].[dbo].[ST_STDNT_CLS_A_235] 
-WHERE 
-	EFF_TRM = '20163'
+﻿IF OBJECT_ID('tempdb..#t1') IS NOT NULL
+	DROP TABLE #t1
+IF OBJECT_ID('tempdb..#t2') IS NOT NULL
+	DROP TABLE #t2
+IF OBJECT_ID('tempdb..#t3') IS NOT NULL
+	DROP TABLE #t3
+IF OBJECT_ID('tempdb..#degrank') IS NOT NULL
+	DROP TABLE #degrank
 
 
-INSERT INTO #FSCJ_ENROLL
-	SELECT 
-		scls.STUDENT_ID
-		,'20163'
-		,'20163'
-	FROM 
-		#FSCJ_SCLS scls 
-		LEFT JOIN #FSCJ_ENROLL ahist ON ahist.student_id = scls.STUDENT_ID
-	WHERE 
-		ahist.student_id IS NULL
-
-UPDATE ahist
-	SET last_term = '20163'
-	FROM
-		#FSCJ_ENROLL ahist
-		INNER JOIN #FSCJ_SCLS scls ON ahist.student_id = scls.student_id
-
-
-IF OBJECT_ID ('tempdb..#TRNSFR') IS NOT NULL
-	DROP TABLE #TRNSFR
-
-SELECT 
-	DISTINCT [STDNT_ID] 
-INTO 
-	#TRNSFR
-    FROM 
-		[MIS].[dbo].[ST_EXTRNL_CRDNTL_A_141] ex_cred 
-		INNER JOIN [MIS].[dbo].[ST_EXTRNL_CRDNTL_A_POST_SECONDARY_AWARD_141] ps_awd ON ex_cred.[ISN_ST_EXTRNL_CRDNTL_A] = ps_awd.[ISN_ST_EXTRNL_CRDNTL_A]
+SELECT DISTINCT
+	gen.FIELD_VALUE AS AWD_TYPE
+	,CAST(gen2.FIELD_VALUE AS INT) AS DEGRANK
+INTO
+	#degrank
+FROM
+	MIS.dbo.UTL_CODE_TABLE_120 code
+	INNER JOIN MIS.dbo.UTL_CODE_TABLE_GENERIC_120 gen ON gen.ISN_UTL_CODE_TABLE = code.ISN_UTL_CODE_TABLE
+	INNER JOIN MIS.dbo.ST_PROGRAMS_A_136 prog ON prog.AWD_TY = gen.FIELD_VALUE
+	INNER JOIN MIS.dbo.UTL_CODE_TABLE_GENERIC_120 gen2 ON gen2.ISN_UTL_CODE_TABLE = code.ISN_UTL_CODE_TABLE
 WHERE
-	[CRDNTL_CD] = 'PC' 
+	code.TABLE_NAME = 'AWARD-LVL'
+	AND code.STATUS = 'A'
+	AND gen.cnxarraycolumn = 0
+	AND gen2.cnxarraycolumn = 7
+	AND prog.EFF_TRM_D <> ''
+	AND prog.END_TRM = ''
+
+SELECT
+	npsas.[Institute ID]
+	,npsas.[Case ID]
+	,npsas.SSN
+	,ISNULL(SUBSTRING(MIN(hist.sessBegDt), 5, 2), 0) AS [MinDate_mm]
+	,ISNULL(RIGHT(MIN(hist.sessBegDt), 2), 0) AS [MinDate_dd]
+	,ISNULL(LEFT(MIN(hist.sessBegDt), 4), 0) AS [MinDate_yyyy]
+	,ISNULL(SUBSTRING(MAX(hist.sessEndDt), 5, 2), 0) AS [MaxDate_mm]
+	,ISNULL(RIGHT(MAX(hist.sessEndDt), 2), 0) AS [MaxDate_dd]
+	,ISNULL(LEFT(MAX(hist.sessEndDt), 4), 0) AS [MaxDate_yyyy]
+INTO
+	#t1
+FROM
+	Adhoc.dbo.[NPSASSurveyStudents] npsas
+	LEFT JOIN MIS.dbo.ST_ACDMC_HIST_A_154 hist ON hist.STUDENT_ID = npsas.SSN
+											   AND hist.sessBegDt <> ''
 GROUP BY
-	stdnt_id
-					
-IF OBJECT_ID ('tempdb..#ACT') IS NOT NULL
-	DROP TABLE #ACT
+	npsas.[Institute ID]
+	,npsas.[Case ID]
+	,npsas.SSN
 
-SELECT 
-	DISTINCT TST.STUDENT_ID
-	,SUBSTRING(SUBTEST,1,1) AS TEST_TY
-	,MAX(TST_SCR) AS HIGH_SCR
-INTO #ACT
-FROM 
-		[Adhoc].[dbo].[NPSASSurveyStudents] main
-		INNER JOIN [MIS].[dbo].[ST_STDNT_SSN_SID_XWALK_606] xwlk ON main.[Student ID] = xwlk.STUDENT_ID
-		INNER JOIN [MIS].[dbo].[ST_SUBTEST_A_155] TST ON TST.STUDENT_ID = XWLK.STUDENT_SSN
-where 
-	[TST_TY] = 'ACT' 
-	and [SUBTEST] IN ('EN','MA','RE','SR','TC') AND TST_SCR > 0
-GROUP BY 
-	TST.STUDENT_ID, SUBSTRING(SUBTEST,1,1)
+SELECT
+	npsas.*
+	,CASE
+		WHEN obj.STDNT_ID IS NOT NULL THEN 1
+		ELSE 0
+	END AS [Expected To Graduate]
+	,CASE
+		WHEN cred.STDNT_ID IS NOT NULL THEN 1
+		ELSE 0
+	END AS [Transfer Credit]
+	,-1 AS [Remedial Courses]
+	,CASE
+		WHEN ftic.[STUDENT-ID] IS NOT NULL THEN 1
+		ELSE 0
+	END AS [FTIC]
+	,CASE
+		WHEN baccext.STDNT_ID + intbacc.STDNT_ID IS NOT NULL THEN 1
+		ELSE 0
+	END AS [Received Bacc]
+	,CASE 
+		WHEN baccext.ACT_GRAD_DT IS NOT NULL THEN CAST(SUBSTRING(baccext.ACT_GRAD_DT, 3, 2) AS INT)
+		ELSE 0
+	END AS [Date_Bacc_Received_mm]
+	,CASE 
+		WHEN baccext.ACT_GRAD_DT IS NOT NULL THEN CAST(SUBSTRING(baccext.ACT_GRAD_DT, 5, 2) AS INT)
+		ELSE 0
+	END AS [Date_Bacc_Received_dd]
+	,CASE 
+		WHEN baccext.ACT_GRAD_DT IS NOT NULL THEN CAST(SUBSTRING(baccext.ACT_GRAD_DT, 1, 4) AS INT)
+		ELSE 0
+	END AS [Date_Bacc_Received_yyyy]
+	,ISNULL(act_eng.TST_SCR, 0) AS [ACT_Eng_Score]
+	,ISNULL(act_mat.TST_SCR, 0) AS [ACT_Math_Score]
+	,ISNULL(act_rea.TST_SCR, 0) AS [ACT_Rea_Score]
+	,ISNULL(act_comp.TST_SCR, 0) AS [ACT_Comp_Score]
+	,ISNULL(sat_crit.TST_SCR, 0) AS [SAT_Crit_Score]
+	,ISNULL(sat_math.TST_SCR, 0) AS [SAT_Math_Score]
+	,ISNULL(sat_wri.TST_SCR, 0) AS [SAT_Writing_Score]
+	,0 AS [Attended 2011-12]
+	,0 AS [prog 2011-12]
+	,'' AS [Grad Degree 2011-12]
+	,0 AS [Class_Level 2011-12]
+	,0 AS [Deg_Compl_mm 2011-12]
+	,0 AS [Deg_Compl_dd 2011-12]
+	,0 AS [Deg_Compl_yyyy 2011-12]
+	,0 AS [Cumm GPA 2011-12]
+	,'' AS [First_Major 2011-12]
+	,'' AS [First_Major_CIP 2011-12]
+	,'' AS [Second_Major 2011-12]
+	,'' AS [Second_Major_CIP 2011-12]
+	,'' AS [Undeclared 2011-12]
+	,0 AS [Total Reqd Clock Hours 2011-12]
+	,0 AS [Total Cmpltd Clock Hours 2011-12]
+	,0 AS [Total Reqd Credit Hours 2011-12]
+	,0 AS [Total Cmpltd Credit Hours 2011-12]
+	,0 AS [Total Fees charged 2011-12]
+	,0 AS [Res for Tuition 2011-12]
+	,0 AS [Enrollment Status 20121]
+	,0 AS [Hrs 20121]
+	,0 AS [Enrollment Status 20122]
+	,0 AS [Hrs 20122]
+	,0 AS [Enrollment Status 20123]
+	,0 AS [Hrs 20123]
+	,0 AS [Attended 2012-13]
+	,0 AS [prog 2012-13]
+	,'' AS [Grad Degree 2012-13]
+	,0 AS [Class_Level 2012-13]
+	,0 AS [Deg_Compl_mm 2012-13]
+	,0 AS [Deg_Compl_dd 2012-13]
+	,0 AS [Deg_Compl_yyyy 2012-13]
+	,0 AS [Cumm GPA 2012-13]
+	,'' AS [First_Major 2012-13]
+	,'' AS [First_Major_CIP 2012-13]
+	,'' AS [Second_Major 2012-13]
+	,'' AS [Second_Major_CIP 2012-13]
+	,'' AS [Undeclared 2012-13]
+	,0 AS [Total Reqd Clock Hours 2012-13]
+	,0 AS [Total Cmpltd Clock Hours 2012-13]
+	,0 AS [Total Reqd Credit Hours 2012-13]
+	,0 AS [Total Cmpltd Credit Hours 2012-13]
+	,0 AS [Total Fees charged 2012-13]
+	,0 AS [Res for Tuition 2012-13]
+	,0 AS [Enrollment Status 20131]
+	,0 AS [Hrs 20131]
+	,0 AS [Enrollment Status 20132]
+	,0 AS [Hrs 20132]
+	,0 AS [Enrollment Status 20133]
+	,0 AS [Hrs 20133]
+	,0 AS [Attended 2013-14]
+	,0 AS [prog 2013-14]
+	,'' AS [Grad Degree 2013-14]
+	,0 AS [Class_Level 2013-14]
+	,0 AS [Deg_Compl_mm 2013-14]
+	,0 AS [Deg_Compl_dd 2013-14]
+	,0 AS [Deg_Compl_yyyy 2013-14]
+	,0 AS [Cumm GPA 2013-14]
+	,'' AS [First_Major 2013-14]
+	,'' AS [First_Major_CIP 2013-14]
+	,'' AS [Second_Major 2013-14]
+	,'' AS [Second_Major_CIP 2013-14]
+	,'' AS [Undeclared 2013-14]
+	,0 AS [Total Reqd Clock Hours 2013-14]
+	,0 AS [Total Cmpltd Clock Hours 2013-14]
+	,0 AS [Total Reqd Credit Hours 2013-14]
+	,0 AS [Total Cmpltd Credit Hours 2013-14]
+	,0 AS [Total Fees charged 2013-14]
+	,0 AS [Res for Tuition 2013-14]
+	,0 AS [Enrollment Status 20141]
+	,0 AS [Hrs 20141]
+	,0 AS [Enrollment Status 20142]
+	,0 AS [Hrs 20142]
+	,0 AS [Enrollment Status 20143]
+	,0 AS [Hrs 20143]
+	,0 AS [Attended 2014-15]
+	,0 AS [prog 2014-15]
+	,'' AS [Grad Degree 2014-15]
+	,0 AS [Class_Level 2014-15]
+	,0 AS [Deg_Compl_mm 2014-15]
+	,0 AS [Deg_Compl_dd 2014-15]
+	,0 AS [Deg_Compl_yyyy 2014-15]
+	,0 AS [Cumm GPA 2014-15]
+	,'' AS [First_Major 2014-15]
+	,'' AS [First_Major_CIP 2014-15]
+	,'' AS [Second_Major 2014-15]
+	,'' AS [Second_Major_CIP 2014-15]
+	,'' AS [Undeclared 2014-15]
+	,0 AS [Total Reqd Clock Hours 2014-15]
+	,0 AS [Total Cmpltd Clock Hours 2014-15]
+	,0 AS [Total Reqd Credit Hours 2014-15]
+	,0 AS [Total Cmpltd Credit Hours 2014-15]
+	,0 AS [Total Fees charged 2014-15]
+	,0 AS [Res for Tuition 2014-15]
+	,0 AS [Enrollment Status 20151]
+	,0 AS [Hrs 20151]
+	,0 AS [Enrollment Status 20152]
+	,0 AS [Hrs 20152]
+	,0 AS [Enrollment Status 20153]
+	,0 AS [Hrs 20153]
+	,0 AS [Attended 2015-16]
+	,0 AS [prog 2015-16]
+	,'' AS [Grad Degree 2015-16]
+	,0 AS [Class_Level 2015-16]
+	,0 AS [Deg_Compl_mm 2015-16]
+	,0 AS [Deg_Compl_dd 2015-16]
+	,0 AS [Deg_Compl_yyyy 2015-16]
+	,0 AS [Cumm GPA 2015-16]
+	,'' AS [First_Major 2015-16]
+	,'' AS [First_Major_CIP 2015-16]
+	,'' AS [Second_Major 2015-16]
+	,'' AS [Second_Major_CIP 2015-16]
+	,'' AS [Undeclared 2015-16]
+	,0 AS [Total Reqd Clock Hours 2015-16]
+	,0 AS [Total Cmpltd Clock Hours 2015-16]
+	,0 AS [Total Reqd Credit Hours 2015-16]
+	,0 AS [Total Cmpltd Credit Hours 2015-16]
+	,0 AS [Total Fees charged 2015-16]
+	,0 AS [Res for Tuition 2015-16]
+	,0 AS [Enrollment Status 20161]
+	,0 AS [Hrs 20161]
+	,0 AS [Enrollment Status 20162]
+	,0 AS [Hrs 20162]
+	,0 AS [Enrollment Status 20163]
+	,0 AS [Hrs 20163]
+	,0 AS [Attended 2016-17]
+	,0 AS [prog 2016-17]
+	,'' AS [Grad Degree 2016-17]
+	,0 AS [Class_Level 2016-17]
+	,0 AS [Deg_Compl_mm 2016-17]
+	,0 AS [Deg_Compl_dd 2016-17]
+	,0 AS [Deg_Compl_yyyy 2016-17]
+	,0 AS [Cumm GPA 2016-17]
+	,'' AS [First_Major 2016-17]
+	,'' AS [First_Major_CIP 2016-17]
+	,'' AS [Second_Major 2016-17]
+	,'' AS [Second_Major_CIP 2016-17]
+	,'' AS [Undeclared 2016-17]
+	,0 AS [Total Reqd Clock Hours 2016-17]
+	,0 AS [Total Cmpltd Clock Hours 2016-17]
+	,0 AS [Total Reqd Credit Hours 2016-17]
+	,0 AS [Total Cmpltd Credit Hours 2016-17]
+	,0 AS [Total Fees charged 2016-17]
+	,0 AS [Res for Tuition 2016-17]
+	,0 AS [Enrollment Status 20171]
+	,0 AS [Hrs 20171]
+	,0 AS [Enrollment Status 20172]
+	,0 AS [Hrs 20172]
+	,0 AS [Enrollment Status 20173]
+	,0 AS [Hrs 20173]
+INTO
+	#t2
+FROM
+	#t1 npsas
+	LEFT JOIN MIS.dbo.ST_STDNT_OBJ_AWD_A_178 obj ON obj.STDNT_ID = npsas.SSN
+												 AND obj.PRIM_FLG = 1
+												 AND obj.PGM_STAT <> 'IN'
+												 AND obj.GRAD_STAT <> 'G'
+												 AND obj.EXPCTD_GRAD_TRM <> ''	
+												 AND obj.EXPCTD_GRAD_TRM <= '20173'
+	LEFT JOIN (SELECT
+					DISTINCT cred.STDNT_ID
+					,ROW_NUMBER() OVER (PARTITION BY cred.STDNT_ID ORDER BY ps_award.cnxarraycolumn DESC) RN
+				FROM
+					MIS.dbo.ST_EXTRNL_CRDNTL_A_141 cred
+					INNER JOIN MIS.dbo.[ST_EXTRNL_CRDNTL_A_POST_SECONDARY_AWARD_141] ps_award ON ps_award.ISN_ST_EXTRNL_CRDNTL_A = cred.ISN_ST_EXTRNL_CRDNTL_A
+				WHERE
+					cred.CRDNTL_CD = 'PC') cred ON cred.STDNT_ID = npsas.SSN
+												AND cred.RN = 1	
+	LEFT JOIN (SELECT
+					*
+					,ROW_NUMBER() OVER (PARTITION BY r1.[STUDENT-ID] ORDER BY xwalk.OrionTerm ASC) RN
+				FROM
+					StateSubmission.SDB.RecordType1 r1
+					INNER JOIN MIS.dbo.vwTermYearXwalk xwalk ON xwalk.StateReportingTerm = r1.[TERM-ID]
+				WHERE
+					r1.[DE1005-FTIC-FLG] IN ('D','Y')) ftic ON ftic.[STUDENT-ID] = npsas.SSN
+															AND ftic.RN = 1
+	LEFT JOIN (SELECT
+					cred.*
+					,ROW_NUMBER() OVER (PARTITION BY cred.STDNT_ID ORDER BY cred.ACT_GRAD_DT DESC) RN
+				FROM
+					MIS.dbo.ST_EXTRNL_CRDNTL_A_141 cred
+				WHERE
+					cred.CRDNTL_CD = 'PC'
+					AND LEFT(cred.DIPL_TYPE, 1) = 'B') baccext ON baccext.STDNT_ID = npsas.SSN
+															   AND cred.RN = 1
+	LEFT JOIN MIS.dbo.ST_STDNT_OBJ_AWD_A_178 intbacc ON intbacc.STDNT_ID = npsas.SSN
+													 AND intbacc.GRAD_STAT = 'G'
+													 AND intbacc.PGM_STAT = 'GR'
+													 AND LEFT(intbacc.AWD_TYPE, 1) = 'B'
+	LEFT JOIN (SELECT
+					*
+					,ROW_NUMBER() OVER (PARTITION BY test.STUDENT_ID ORDER BY test.TST_SCR DESC) RN
+				FROM
+					MIS.dbo.ST_SUBTEST_A_155 test
+				WHERE 
+					test.TST_TY = 'ACT'
+					AND [SUBTEST] = 'EN'
+					AND TST_SCR > 0 ) act_eng ON act_eng.STUDENT_ID = npsas.SSN 
+											  AND act_eng.RN = 1
+	LEFT JOIN (SELECT
+					*
+					,ROW_NUMBER() OVER (PARTITION BY test.STUDENT_ID ORDER BY test.TST_SCR DESC) RN
+				FROM
+					MIS.dbo.ST_SUBTEST_A_155 test
+				WHERE 
+					test.TST_TY = 'ACT'
+					AND [SUBTEST] = 'MA'
+					AND TST_SCR > 0 ) act_mat ON act_mat.STUDENT_ID = npsas.SSN 
+											  AND act_mat.RN = 1
+	LEFT JOIN (SELECT
+					*
+					,ROW_NUMBER() OVER (PARTITION BY test.STUDENT_ID ORDER BY test.TST_SCR DESC) RN
+				FROM
+					MIS.dbo.ST_SUBTEST_A_155 test
+				WHERE 
+					test.TST_TY = 'ACT'
+					AND [SUBTEST] = 'RE'
+					AND TST_SCR > 0 ) act_rea ON act_rea.STUDENT_ID = npsas.SSN 
+											  AND act_rea.RN = 1
+	LEFT JOIN (SELECT
+					*
+					,ROW_NUMBER() OVER (PARTITION BY test.STUDENT_ID ORDER BY test.TST_SCR DESC) RN
+				FROM
+					MIS.dbo.ST_SUBTEST_A_155 test
+				WHERE 
+					test.TST_TY = 'ACT'
+					AND [SUBTEST] = 'SR'
+					AND TST_SCR > 0 ) act_sci ON act_sci.STUDENT_ID = npsas.SSN 
+											  AND act_sci.RN = 1
+	LEFT JOIN (SELECT
+					*
+					,ROW_NUMBER() OVER (PARTITION BY test.STUDENT_ID ORDER BY test.TST_SCR DESC) RN
+				FROM
+					MIS.dbo.ST_SUBTEST_A_155 test
+				WHERE 
+					test.TST_TY = 'ACT'
+					AND [SUBTEST] = 'TC'
+					AND TST_SCR > 0 ) act_comp ON act_comp.STUDENT_ID = npsas.SSN 
+											   AND act_comp.RN = 1
+	LEFT JOIN (SELECT
+					*
+					,ROW_NUMBER() OVER (PARTITION BY test.STUDENT_ID ORDER BY test.TST_SCR DESC) RN
+				FROM
+					MIS.dbo.ST_SUBTEST_A_155 test
+				WHERE 
+					test.TST_TY = 'SAT'
+					AND [SUBTEST] IN ('VE','VR')
+					AND TST_SCR > 0 ) sat_crit ON sat_crit.STUDENT_ID = npsas.SSN 
+											   AND sat_crit.RN = 1
+	LEFT JOIN (SELECT
+					*
+					,ROW_NUMBER() OVER (PARTITION BY test.STUDENT_ID ORDER BY test.TST_SCR DESC) RN
+				FROM
+					MIS.dbo.ST_SUBTEST_A_155 test
+				WHERE 
+					test.TST_TY = 'SAT'
+					AND [SUBTEST] = 'MA'
+					AND TST_SCR > 0 ) sat_math ON sat_math.STUDENT_ID = npsas.SSN 
+											   AND sat_math.RN = 1
+	LEFT JOIN (SELECT
+					*
+					,ROW_NUMBER() OVER (PARTITION BY test.STUDENT_ID ORDER BY test.TST_SCR DESC) RN
+				FROM
+					MIS.dbo.ST_SUBTEST_A_155 test
+				WHERE 
+					test.TST_TY = 'SAT'
+					AND [SUBTEST] = 'X3'
+					AND TST_SCR > 0 ) sat_wri ON sat_wri.STUDENT_ID = npsas.SSN 
+											  AND sat_wri.RN = 1
 
-IF OBJECT_ID ('tempdb..#SAT') IS NOT NULL
-	DROP TABLE #SAT
 
-SELECT 
-	DISTINCT TST.STUDENT_ID, SUBSTRING(SUBTEST,1,1) AS TEST_TY, MAX(TST_SCR) AS HIGH_SCR
-INTO #SAT
-from 
-	[Adhoc].[dbo].[NPSASSurveyStudents] main
-	INNER JOIN [MIS].[dbo].[ST_STDNT_SSN_SID_XWALK_606] xwlk ON main.[Student ID] = xwlk.STUDENT_ID
-	INNER JOIN [MIS].[dbo].[ST_SUBTEST_A_155] TST ON TST.STUDENT_ID = XWLK.STUDENT_SSN
-where 
-	[TST_TY] = 'SAT' 
-	and [SUBTEST] IN ('X3','MA','VE','VR') AND TST_SCR > 0
-GROUP BY 
-	TST.STUDENT_ID, SUBSTRING(SUBTEST,1,1)
+DECLARE @curYear INT = 2012
+DECLARE @curYearString CHAR(4)
+DECLARE @academicYear CHAR(7)
+DECLARE @nextYearString CHAR(4)
 
-IF OBJECT_ID ('tempdb..#FTIC') IS NOT NULL
-	DROP TABLE #FTIC
+WHILE @curYear <= 2017
+BEGIN
 
-SELECT DISTINCT MAIN.[Case ID], XWLK.STUDENT_SSN
-  INTO #FTIC
-  from [Adhoc].[dbo].[NPSASSurveyStudents] main
-  INNER JOIN [MIS].[dbo].[ST_STDNT_SSN_SID_XWALK_606] xwlk ON main.[Student ID] = xwlk.STUDENT_ID
-  INNER JOIN [StateSubmission].[SDB].[RecordType1] rec1 ON (xwlk.STUDENT_SSN = rec1.[STUDENT-ID] or xwlk.STUDENT_SSN = substring(rec1.[STUDENT-ID],2,9)) and rec1.[SubmissionType] = 'E' and rec1.[TERM-ID] in ('115','215','316') and [DE1005-FTIC-FLG] in ('D','Y')
+	SET @academicYear = CAST(@curYear - 1 AS VARCHAR) + '-' + RIGHT(CAST(@curYear AS VARCHAR), 2)
 
-IF OBJECT_ID ('tempdb..#DEV') IS NOT NULL
-	DROP TABLE #DEV
+	SET @curYearString = CAST(@curYear AS VARCHAR)
 
-SELECT 
-	DISTINCT MAIN.[Case ID]
-	,main.SSN
-INTO #DEV
-from 
-	[Adhoc].[dbo].[NPSASSurveyStudents] main
-	INNER JOIN [MIS].[dbo].[ST_STDNT_TEST_DEMO_A_174] demo ON demo.[STDNT_ID] = main.SSN
-	LEFT JOIN [MIS].[dbo].[ST_STDNT_TEST_DEMO_A_CHAIN_1_174] chain1 ON demo.[ISN_ST_STDNT_TEST_DEMO_A] = chain1.[ISN_ST_STDNT_TEST_DEMO_A] 
-																	and [SATISFIED_1_IND] = 'G' 
-																	AND SUBSTRING(COURSE_CHAIN_1,4,2) = '00'
-	LEFT JOIN [MIS].[dbo].[ST_STDNT_TEST_DEMO_A_CHAIN_2_174] chain2 ON demo.[ISN_ST_STDNT_TEST_DEMO_A] = chain2.[ISN_ST_STDNT_TEST_DEMO_A] 
-																	and [SATISFIED_2_IND] = 'G' 
-																	AND SUBSTRING(COURSE_CHAIN_2,4,2) = '00'
-WHERE 
-	CHAIN1.[ISN_ST_STDNT_TEST_DEMO_A] IS NOT NULL AND CHAIN2.[ISN_ST_STDNT_TEST_DEMO_A] IS NOT NULL
+	SET @nextYearString = CAST(@curYear + 1 AS VARCHAR)
 
-
-IF OBJECT_ID ('tempdb..#CREDITS') IS NOT NULL
-	DROP TABLE #CREDITS
-
-SELECT 
-	main.[Case ID]
-	,isnull(term_20153.hrs_ern,0) as Cred_Units_20153
-	,isnull(term_20161.hrs_ern,0) as Cred_Units_20161
-	,isnull(term_20162.hrs_ern,0) as Cred_Units_20162
-	,isnull(term_20163.hrs_ern,0) as Cred_Units_20163
-	,isnull(clk_20153.clk_hrs,0) as Clk_Hrs_20153
-	,isnull(clk_20161.clk_hrs,0) as Clk_Hrs_20161
-	,isnull(clk_20162.clk_hrs,0) as Clk_Hrs_20162
-	,isnull(clk_20163.clk_hrs,0) as Clk_Hrs_20163
-INTO 
-	#CREDITS
-FROM 
-	[Adhoc].[dbo].[NPSASSurveyStudents] main
-	INNER JOIN [MIS].[dbo].[ST_STDNT_SSN_SID_XWALK_606] xwlk ON main.[Student ID] = xwlk.STUDENT_ID
-	LEFT JOIN [MIS].[dbo].[WW_STUDENT_822] wstdnt ON xwlk.student_SSN = WSTDNT.[WW_ST_SID] 
-	LEFT JOIN [MIS].[dbo].[WF_AIDYEAR_825] aidyr ON wstdnt.[WW_STUDENT_ID] = aidyr.[WW_STUDENT_ID] and aidyr.WF_AID_YEAR = '2016'
-	LEFT JOIN [MIS].[dbo].[ST_STDNT_TERM_A_236] term_20153 ON term_20153.stdnt_id = xwlk.student_ssn and term_20153.trm_yr = '20153'
-	LEFT JOIN [MIS].[dbo].[ST_STDNT_TERM_A_236] term_20161 ON term_20161.stdnt_id = xwlk.student_ssn and term_20161.trm_yr = '20161'
-	LEFT JOIN [MIS].[dbo].[ST_STDNT_TERM_A_236] term_20162 ON term_20162.stdnt_id = xwlk.student_ssn and term_20162.trm_yr = '20162'
-	--LEFT JOIN [MIS].[dbo].[ST_STDNT_TERM_A_236] term_20163 ON term_20163.stdnt_id = xwlk.student_ssn and term_20163.trm_yr = '20163'
-	left join (SELECT
-					scls.stdnt_id as student_id
-					,sum([EVAL_CRED_HRS]) as hrs_ern 
-				FROM 
-					[Adhoc].[dbo].[NPSASSurveyStudents] main 
-					inner join [MIS].[dbo].[ST_STDNT_CLS_A_235] scls ON scls.STDNT_ID = main.SSN 
-																	 AND scls.cred_ty in ('01','02','14','15') 
-																	 AND scls.[EFF_TRM] = '20163'
-					INNER JOIN [MIS].[dbo].[ST_CLASS_A_151] cls ON scls.ref_num = cls.ref_num
-				GROUP BY
-					scls.stdnt_id) term_20163 ON xwlk.student_ssn = term_20163.student_id
-  left join (SELECT
-				ahist.student_id
-				,sum([EXTRNL_CNTCT_HRS]) as clk_hrs 
-			FROM 
-				[Adhoc].[dbo].[NPSASSurveyStudents] main
-				inner join [MIS].[dbo].[ST_ACDMC_HIST_A_154] ahist ON ahist.student_id = main.SSN
-																   AND ahist.cred_ty = '05'
-																   AND [effTrm] = '20153'
-			GROUP BY
-					ahist.student_id) clk_20153 on xwlk.student_ssn = clk_20153.student_id
-  LEFT JOIN (SELECT 
-				ahist.student_id
-				,sum([EXTRNL_CNTCT_HRS]) as clk_hrs 
-			FROM 
-				[Adhoc].[dbo].[NPSASSurveyStudents] main 
-				inner join [MIS].[dbo].[ST_ACDMC_HIST_A_154] ahist ON ahist.student_id = main.SSN 
-																   AND ahist.cred_ty = '05' 
-																   AND [effTrm] = '20161'
-			GROUP BY 
-				ahist.student_id) clk_20161 on xwlk.student_ssn = clk_20161.student_id
-  LEFT JOIN (SELECT
-				 ahist.student_id
-				 ,sum([EXTRNL_CNTCT_HRS]) as clk_hrs 
-			FROM 
-				[Adhoc].[dbo].[NPSASSurveyStudents] main
-				inner join [MIS].[dbo].[ST_ACDMC_HIST_A_154] ahist ON ahist.student_id = main.[Student ID] 
-																   AND ahist.cred_ty = '05' 
-																   AND [effTrm] = '20162'
-			GROUP BY 
-				ahist.student_id) clk_20162 on xwlk.student_ssn = clk_20162.student_id
-  left join (SELECT
-				scls.stdnt_id as student_id
-				,sum([CNTCT_HRS]) as clk_hrs 
-			FROM 
-				[Adhoc].[dbo].[NPSASSurveyStudents] main
-				inner join [MIS].[dbo].[ST_STDNT_CLS_A_235] scls ON scls.STDNT_ID = main.SSN 
-																 AND scls.cred_ty = '05' 
-																 AND scls.[EFF_TRM] = '20163'
-				INNER JOIN [MIS].[dbo].[ST_CLASS_A_151] cls ON scls.ref_num = cls.ref_num
-			GROUP BY 
-				scls.stdnt_id) clk_20163 on xwlk.student_ssn = clk_20163.student_id
-
-
-IF OBJECT_ID ('tempdb..#Fees') IS NOT NULL
-	DROP TABLE #Fees
-
-SELECT 
-	main.[Case ID]
-	,sum([FEE_ASSESS_AMOUNT]) as Tuition_Fees_Amt
-into #Fees
-	from 
-		[Adhoc].[dbo].[NPSASSurveyStudents] main
-		INNER JOIN [MIS].[dbo].[IT_STUDENT_FEES_A_145] fees ON main.[Student ID] = fees.[stdntId]
-															and [trmYr] in ('20153','20161','20162','20163')  
-GROUP BY
-	 main.[Case ID]
-
-SELECT  
-      main.[Institute ID]
-      ,main.[Case ID]
-	  ,main.[Student ID]
-	  ,isnull(substring(fst_date.SESS_BEG_DT,5,2),'00') AS 'First_Enroll_mm'
-	  ,isnull(substring(fst_date.SESS_BEG_DT,7,2),'00') as 'First_Enroll_dd'
-	  ,isnull(substring(fst_date.SESS_BEG_DT,1,4),'00') as 'First_Enroll_yr'
-	  ,isnull(substring(lst_date.SESS_END_DT,5,2),'00') as 'Last_Enroll_mm'
-	  ,isnull(substring(lst_date.SESS_END_DT,7,2),'00') as 'Last_Enroll_dd'
-	  ,isnull(substring(lst_date.SESS_END_DT,1,4),'00') as 'Last_Enroll_yr'
-	  ,case
-	     when obj.[EXPCTD_GRAD_TRM] <= '20163' and obj.grad_stat != 'G'
-		   then '1'
-		 when obj_prim.expctd_grad_trm <= '20163' and obj_prim.grad_stat != 'G' then '1'
-		 when obj_gr.expctd_grad_trm <= '20163' and obj_gr.grad_stat != 'G' then '1'
-		 else '0' end as 'Expect_To_Complete'
-	  ,CASE when ps_trnsfr.[STDNT_ID] IS NOT NULL then '1'
-	        else '0' end as 'Transfer_Cred'
-	  ,'' as 'Remedial_courses'
-	  ,case 
-	    when ftic.[Case ID] is not null then '1'
-		else '0' end as 'FTIC'
-	  ,case 
-	    when bac_degree.[STDNT_ID] is not null then '1'
-		when obj_degree.stdnt_id is not null then '1'
-		else '-1' end as 'Rcvd_Bacc'
-	  ,case
-	    when bac_degree.[stdnt_id] is not null then substring(bac_degree.GRAD_DT,5,2)
-		when obj_degree.stdnt_id is not null then substring(obj_degree.grad_dt,5,2) 
-		else '' end as 'Date_Rcvd_Bacc_MM'
-	  ,case
-	    when bac_degree.[stdnt_id] is not null then substring(bac_degree.GRAD_DT,7,2)
-		when obj_degree.stdnt_id is not null then substring(obj_degree.grad_dt,7,2) 
-		else '' end  as 'Date_Rcvd_Bacc_dd'
-	  ,case
-	    when bac_degree.[stdnt_id] is not null then substring(bac_degree.GRAD_DT,1,4)
-		when obj_degree.stdnt_id is not null then substring(obj_degree.grad_dt,1,4) 
-		else '' end  as 'Date_Rcvd_Bacc_yr'
-	  ,isnull(cast(act_Eng.HIGH_SCR as varchar),'') as 'ACT_Eng_score'
-	  ,isnull(cast(act_Mat.HIGH_SCR as varchar),'') as 'ACT_Math_score'
-	  ,isnull(cast(act_REA.HIGH_SCR as varchar),'') as 'ACT_Read_score'
-	  ,isnull(cast(act_SCI.HIGH_SCR as varchar),'') as 'ACT_Science_score'
-	  ,isnull(cast(act_COM.HIGH_SCR as varchar),'') as 'ACT_Comp_score'
-	  ,isnull(cast(SAT_CRT.HIGH_SCR as varchar),'') as 'SAT_crit_read_score'
-	  ,isnull(cast(SAT_MAT.HIGH_SCR as varchar),'') as 'SAT_Mat_score'
-	  ,isnull(cast(SAT_WRT.HIGH_SCR as varchar),'') as 'SAT_Write_score'
-	  ,CASE
-			WHEN class2012.STDNT_ID IS NULL THEN 0
-			ELSE 1
-		END AS [Enrolledin201213]
-	  ,case
-	    when [TRM_DEGREE] = 'ND' THEN '1'
-		when obj_prim.AWD_TYPE = 'ND' THEN '1'
-		when obj_gr.AWD_TYPE = 'ND' THEN '1'
-		when [TRM_DEGREE] = 'VC' then '2'
-		when obj_prim.AWD_TYPE = 'VC' THEN '2'
-		when obj_gr.AWD_TYPE = 'VC' THEN '2'
-		when substring([TRM_DEGREE],1,1) = 'A' then '3'
-		when substring(obj_prim.AWD_TYPE,1,1) = 'A' THEN '3'
-		when substring(obj_gr.AWD_TYPE,1,1) = 'A' THEN '3'
-		when substring([TRM_DEGREE],1,1) = 'B' then '4'
-		when substring(obj_prim.AWD_TYPE,1,1) = 'B' THEN '4'
-		when substring(obj_gr.AWD_TYPE,1,1) = 'B' THEN '4'
-		else '-1' end as 'Prog_Degree'
-	--, stdnt.student_id
-	  ,'' as 'Grad_Degree'
-	  ,CASE
-			WHEN lstdeggranted.GRAD_STAT = 'G' THEN SUBSTRING(lstdeggranted.ACT_GRAD_DT, 3, 2)
-			ELSE ''
-		END AS [Deg_Compl_mm]
-		,CASE
-			WHEN lstdeggranted.GRAD_STAT = 'G' THEN RIGHT(lstdeggranted.ACT_GRAD_DT, 2)
-			ELSE ''
-		END AS [Deg_Compl_dd]
-		,CASE
-			WHEN lstdeggranted.GRAD_STAT = 'G' THEN LEFT(lstdeggranted.ACT_GRAD_DT, 4)
-			ELSE ''
-		END AS [Deg_Compl_yyyy]
-	  ,case 
-	    when [TRM_CLASS] = 'FR' then '1'
-		when [TRM_CLASS] = 'SO' then '2'
-		when [TRM_CLASS] = 'JR' then '3'
-		when [TRM_CLASS] = 'SR' then '4'
-		when gpa.[T1_DE1012_CLASS_LEVEL] in ('1','2','3','4','6') then gpa.[T1_DE1012_CLASS_LEVEL]
-
-
-		else '-1' end  as 'Class_Level'
-	  ,case
-	     when obj.grad_stat = 'G' then substring(obj.[ACT_GRAD_DT],5,2)
-		 when obj_prim.grad_stat = 'G' then substring(obj_prim.[ACT_GRAD_DT],5,2)
-		 when obj_gr.grad_stat = 'G' then substring(obj_gr.[ACT_GRAD_DT],5,2)
-		 else '' end as 'Degree_Compl_MM'
-	  ,case
-	     when obj.grad_stat = 'G' then substring(obj.[ACT_GRAD_DT],7,2)
-		 when obj_prim.grad_stat = 'G' then substring(obj_prim.[ACT_GRAD_DT],7,2)
-		 when obj_gr.grad_stat = 'G' then substring(obj_gr.[ACT_GRAD_DT],7,2)
-		 else '' end as 'Degree_Compl_DD'
-	  ,case
-	     when obj.grad_stat = 'G' then substring(obj.[ACT_GRAD_DT],1,4)
-		 when obj_prim.grad_stat = 'G' then substring(obj_prim.[ACT_GRAD_DT],1,4)
-		 when obj_gr.grad_stat = 'G' then substring(obj_gr.[ACT_GRAD_DT],1,4)
-		 else '' end as 'Degree_compl_YR'
-	  ,'' as 'Cumm_GPA'
-	  ,'' as 'First_Major'
-	  ,'' as 'First_Major_CIP'
-	  ,'' as 'Second_Major'
-	  ,'' AS 'Second_Major_CIP'
-	  ,'' as 'Undeclared'
-	  , ''  as 'Tot_#_clk_hrs_cmplt'
-	  ,case 
-	     when [T1_DE1024_TRM_CLOCK_HRS_EARNED] > 0 then cast([T1_DE1024_TRM_CLOCK_HRS_EARNED] as varchar)
-		 else '' end as 'Cumm_Clk_hrs_cmplt'
-	  ,'' as 'Tot_#_cred_hrs_cmplt'
-	  ,case 
-	     when [T1_DE1024_TRM_CLOCK_HRS_EARNED] > 0 then cast([T1_DE1024_TRM_CLOCK_HRS_EARNED] as varchar) 
-		 else '' end as 'Cumm_Cred_hours_cmplt'
-	  ,isnull(fees.Tuition_Fees_Amt,0) as 'Tuition_Fees_charged'
-	  --,curterm.[RES_CD]
-	  ,case 
-	    when curterm.[RES_CD] in ('1','2','3') then curterm.[RES_CD]
-		when curterm.[RES_CD] in ('4','5') then '3'
-		else '' end as 'Res_for_tuition'
-	  ,case 
-		when cred.Cred_Units_20153 >= 12 then '1'
-		when cred.Cred_Units_20153 >= 9 then '2'
-		when cred.Cred_Units_20153 >= 6 then '3'
-		when cred.Cred_Units_20153 > 0 then '4'
-		when cred.Clk_Hrs_20153 >= 450 then '1'
-		when cred.Clk_Hrs_20153 > 225 then '3'
-		when cred.Clk_Hrs_20153 > 0 then '4'
-		else '0' end as '20153_Enroll_stat'
-	  ,isnull(cred.Cred_Units_20153,0) as '20153_Cred_units'
-	  ,case 
-	    when [WW_ST_RT1_TIM] = 'F' then '1'
-		when [WW_ST_RT1_TIM] = 'T' then '2'
-		when [WW_ST_RT1_TIM] = 'H' then '3'
-		when [WW_ST_RT1_TIM] = 'L' then '4'
-		when cred.Cred_Units_20161 >= 12 then '1'
-		when cred.Cred_Units_20161 >= 9 then '2'
-		when cred.Cred_Units_20161 >= 6 then '3'
-		when cred.Cred_Units_20161 > 0 then '4'
-		when cred.Clk_Hrs_20161 >= 450 then '1'
-		when cred.Clk_Hrs_20161 > 225 then '3'
-		when cred.Clk_Hrs_20161 > 0 then '4'
-		else '0' end as '20161_Enroll_stat'
-	  , isnull(cred.Cred_Units_20161,0) as '20161_Cred_units'
-	  ,case 
-	    when [WW_ST_RT2_TIM] = 'F' then '1'
-		when [WW_ST_RT2_TIM] = 'T' then '2'
-		when [WW_ST_RT2_TIM] = 'H' then '3'
-		when [WW_ST_RT2_TIM] = 'L' then '4'
-		when cred.Cred_Units_20162 >= 12 then '1'
-		when cred.Cred_Units_20162 >= 9 then '2'
-		when cred.Cred_Units_20162 >= 6 then '3'
-		when cred.Cred_Units_20162 > 0 then '4'
-		when cred.Clk_Hrs_20162 >= 450 then '1'
-		when cred.Clk_Hrs_20162 > 225 then '3'
-		when cred.Clk_Hrs_20162 > 0 then '4'
-		else '0' end as '20162_Enroll_stat'
-	  ,isnull(cred.Cred_Units_20162,0) as '20162_Cred_units'
-	  ,case
-	    when [WW_ST_RT2_TIM] = 'F' then '1'
-		when [WW_ST_RT2_TIM] = 'T' then '2'
-		when [WW_ST_RT2_TIM] = 'H' then '3'
-		when [WW_ST_RT2_TIM] = 'L' then '4' 
-		when cred.Cred_Units_20163 >= 12 then '1'
-		when cred.Cred_Units_20163 >= 9 then '2'
-		when cred.Cred_Units_20163 >= 6 then '3'
-		when cred.Cred_Units_20163 > 0 then '4'
-		when cred.Clk_Hrs_20163 >= 450 then '1'
-		when cred.Clk_Hrs_20163 > 225 then '3'
-		when cred.Clk_Hrs_20163 > 0 then '4'
-		else '0' end as '20163_Enroll_stat'
-	  ,isnull(cred.Cred_Units_20163,0) as '20163_Cred_units'
-FROM 
-  [Adhoc].[dbo].[NPSASSurveyStudents] main
-  INNER JOIN [MIS].[dbo].[ST_STDNT_A_125] stdnt ON main.[Student ID] = stdnt.STUDENT_SSN
-  LEFT JOIN (SELECT 
-				STUDENT_ID, MAX(TERM_ID) AS MAX_TERM
-			FROM 
-				[MIS].[dbo].[IT_FREEZE_POINT_A_116]
-			WHERE 
-				TERM_ID IN ('20153','20161','20162','20163')
-			GROUP BY 
-				STUDENT_ID) freeze_info on freeze_info.STUDENT_ID = stdnt.STUDENT_ID
-  left join [MIS].[dbo].[IT_FREEZE_POINT_A_116] freeze on stdnt.STUDENT_ID = freeze.STUDENT_ID and freeze.TERM_ID = freeze_info.MAX_TERM
-  LEFT JOIN [MIS].[dbo].[ST_STDNT_OBJ_AWD_A_178] obj on stdnt.STUDENT_ID = obj.STDNT_ID AND obj.PGM_ID = freeze.[TRM_PGM] AND obj.admt_stat = 'Y' and pgm_stat != 'IN'
-  LEFT JOIN [MIS].[dbo].[ST_STDNT_OBJ_AWD_A_178] obj_prim on stdnt.STUDENT_ID = obj_prim.STDNT_ID AND  obj_prim.admt_stat = 'Y' and obj_prim.pgm_stat != 'IN' and obj_prim.PRIM_FLG = 1 
-  left join [MIS].[dbo].[SR_GPA_CALC_604] gpa ON stdnt.student_id = gpa.[SID] and gpa.[TERM] = '20162' and gpa.[RUN_TYPE] = 'E'
-  left join [MIS].[dbo].[ST_STDNT_TERM_A_236] term ON stdnt.student_id = term.stdnt_id and term.[TRM_YR] = freeze.term_id
-  left join (select distinct
-				[STDNT_ID]
-				,max([PS_AWD_DT]) as grad_dt 
-			from 
-				[MIS].[dbo].[ST_EXTRNL_CRDNTL_A_141] ex_cred 
-                inner join [MIS].[dbo].[ST_EXTRNL_CRDNTL_A_POST_SECONDARY_AWARD_141] ps_awd ON ex_cred.[ISN_ST_EXTRNL_CRDNTL_A] = ps_awd.[ISN_ST_EXTRNL_CRDNTL_A] 
-																							AND substring(ps_awd.[PS_AWD_TY],1,1) = 'B'
-			where 
-				[CRDNTL_CD] = 'PC' 
-			group by stdnt_id) bac_degree ON bac_degree.[STDNT_ID] = stdnt.student_id
-  left join (select stdnt_id, max(act_grad_dt) as grad_dt   FROM [MIS].[dbo].[ST_STDNT_OBJ_AWD_A_178]
-				where pgm_stat = 'GR' and substring(awd_type,1,1) = 'B'
-				group by stdnt_id) obj_degree ON obj_degree.stdnt_id = stdnt.student_id
-  left join #TRNSFR ps_trnsfr ON ps_trnsfr.[STDNT_ID] = stdnt.student_id
-  LEFT JOIN #FSCJ_ENROLL fscj_enroll on fscj_enroll.STUDENT_ID = stdnt.STUDENT_ID
-  left join [MIS].[dbo].[vwTermYearXwalk] fst_date on fscj_enroll.FIRST_TERM = fst_date.OrionTerm
-  left join [MIS].[dbo].[vwTermYearXwalk] lst_date on fscj_enroll.LAST_TERM = lst_date.OrionTerm
-  LEFT JOIN #ACT act_Eng ON stdnt.STUDENT_ID = act_Eng.STUDENT_ID and act_Eng.TEST_TY = 'E'
-  LEFT JOIN #ACT act_MAT ON stdnt.STUDENT_ID = act_MAT.STUDENT_ID and act_MAT.TEST_TY = 'M'
-  left join #ACT act_REA ON stdnt.STUDENT_ID = act_REA.STUDENT_ID and act_REA.TEST_TY = 'R'
-  left join #ACT act_Sci ON stdnt.STUDENT_ID = act_Sci.STUDENT_ID and act_Sci.TEST_TY = 'S'
-  left join #ACT act_Com ON stdnt.STUDENT_ID = act_Com.STUDENT_ID and act_Com.TEST_TY = 'T'
-  left join #SAT SAT_CRT ON stdnt.STUDENT_ID = SAT_CRT.STUDENT_ID and SAT_CRT.TEST_TY = 'V'
-  left join #SAT SAT_MAT ON stdnt.STUDENT_ID = SAT_MAT.STUDENT_ID and SAT_MAT.TEST_TY = 'M'
-  left join #SAT SAT_WRT ON stdnt.STUDENT_ID = SAT_WRT.STUDENT_ID and SAT_WRT.TEST_TY = 'X'
-  left join (select 
-				stdnt_id
-				,max(act_grad_dt) as grad_dt   
-			FROM 
-				[MIS].[dbo].[ST_STDNT_OBJ_AWD_A_178]
-			where 
-				pgm_stat = 'GR' 
-			group by 
-				stdnt_id) obj_gr_max ON obj_gr_max.stdnt_id = stdnt.student_id and obj.STDNT_ID is null and obj_prim.STDNT_ID is null
-  LEFT JOIN [MIS].[dbo].[ST_STDNT_OBJ_AWD_A_178] obj_gr on stdnt.STUDENT_ID = obj_gr.STDNT_ID AND obj_gr.act_grad_dt = obj_gr_max.grad_dt
-  LEFT JOIN #FTIC ftic ON ftic.[Case ID] = main.[Case ID]
-  LEFT JOIN [MIS].[dbo].[ST_STDNT_TERM_A_236] curTerm ON stdnt.student_id = curterm.stdnt_id and curTerm.TRM_YR = '20163'
-  LEFT JOIN #Credits cred on main.[Case ID] = cred.[Case ID]
-  LEFT JOIN #Fees fees on main.[Case ID] = fees.[Case ID]
-  LEFT JOIN [MIS].[dbo].[WW_STUDENT_822] wstdnt ON main.[Student ID] = WSTDNT.[WW_ST_SID] 
-  LEFT JOIN [MIS].[dbo].[WF_AIDYEAR_825] aidyr ON wstdnt.[WW_STUDENT_ID] = aidyr.[WW_STUDENT_ID] and aidyr.WF_AID_YEAR = '2016'
-  LEFT JOIN (SELECT
+EXECUTE('
+UPDATE npsas
+	SET 
+		npsas.[Attended ' + @academicYear + '] = CASE
+										WHEN class' + @curYearString + '.STDNT_ID IS NOT NULL THEN 1
+										ELSE 0
+									END
+		,npsas.[prog ' + @academicYear + '] =  CASE
+										WHEN deg' + @curYearString + '.AWD_TYPE = ''ND'' THEN 1
+										WHEN deg' + @curYearString + '.AWD_TYPE = ''TC'' THEN 2
+										WHEN LEFT(deg' + @curYearString + '.AWD_TYPE, 1) = ''A'' THEN 3
+										WHEN LEFT(deg' + @curYearString + '.AWD_TYPE, 1) = ''B'' THEN 4
+										ELSE 0
+									END
+		,npsas.[Deg_Compl_mm ' + @academicYear + '] = CASE
+											WHEN deg' + @curYearString + '.PGM_ID IS NULL THEN 0
+											WHEN deg' + @curYearString + '.ACT_GRAD_TRM = '''' THEN 0
+											ELSE SUBSTRING(deg' + @curYearString + '.ACT_GRAD_DT, 5, 2)
+										END
+		,npsas.[Deg_Compl_dd ' + @academicYear + '] = CASE
+											WHEN deg' + @curYearString + '.PGM_ID IS NULL THEN 0
+											WHEN deg' + @curYearString + '.ACT_GRAD_TRM = '''' THEN 0
+											ELSE RIGHT(deg' + @curYearString + '.ACT_GRAD_DT, 2)
+										END
+		,npsas.[Deg_Compl_yyyy ' + @academicYear + '] = CASE
+											WHEN deg' + @curYearString + '.PGM_ID IS NULL THEN 0
+											WHEN deg' + @curYearString + '.ACT_GRAD_TRM = '''' THEN 0
+											ELSE LEFT(deg' + @curYearString + '.ACT_GRAD_DT, 4)
+										END
+		,npsas.[Total Reqd Clock Hours ' + @academicYear + '] = CASE
+														WHEN prog.PGM_TTL_MIN_CNTCT_HRS_REQD > 0 THEN prog.PGM_TTL_MIN_CNTCT_HRS_REQD
+														ELSE 0
+													END
+		,npsas.[Total Cmpltd Clock Hours ' + @academicYear + '] = CASE
+														WHEN prog.PGM_TTL_MIN_CNTCT_HRS_REQD > 0 THEN ISNULL(calc.T1_DE1024_TRM_CLOCK_HRS_EARNED, 0)
+														ELSE 0
+													END
+		,npsas.[Total Reqd Credit Hours ' + @academicYear + '] = CASE
+														WHEN prog.PGM_TTL_CRD_HRS > 0 THEN prog.PGM_TTL_CRD_HRS
+														ELSE 0
+													END
+		,npsas.[Total Cmpltd Credit Hours ' + @academicYear + '] = CASE
+														WHEN prog.PGM_TTL_CRD_HRS > 0 THEN ISNULL(calc.T1_DE1025_TRM_CREDIT_HRS_EARNED, 0)
+														ELSE 0
+													END
+		,npsas.[Total Fees charged ' + @academicYear + '] = ISNULL(fees.Amount, 0)
+		,npsas.[Res for Tuition ' + @academicYear + '] = case 
+												when resterm.[RES_CD] in (''1'',''2'',''3'') then resterm.[RES_CD]
+												when resterm.[RES_CD] in (''4'',''5'') then ''3''
+												else ''-1'' 
+											end
+		,npsas.[Enrollment Status ' + @curYearString + '1] = CASE
+												WHEN hrs' + @curYearString + '1.Hrs IS NULL THEN 0
+												WHEN hrs' + @curYearString + '1.Hrs = 0 THEN 0
+												WHEN hrs' + @curYearString + '1.Hrs >= 12 THEN 1
+												WHEN hrs' + @curYearString + '1.Hrs >= 9 THEN 2
+												WHEN hrs' + @curYearString + '1.Hrs >= 6 THEN 3
+												ELSE 4
+											END
+		,npsas.[Hrs ' + @curYearString + '1] = ISNULL(hrs' + @curYearString + '1.Hrs, 0)
+		,npsas.[Enrollment Status ' + @curYearString + '2] = CASE
+												WHEN hrs' + @curYearString + '2.Hrs IS NULL THEN 0
+												WHEN hrs' + @curYearString + '2.Hrs = 0 THEN 0
+												WHEN hrs' + @curYearString + '2.Hrs >= 12 THEN 1
+												WHEN hrs' + @curYearString + '2.Hrs >= 9 THEN 2
+												WHEN hrs' + @curYearString + '2.Hrs >= 6 THEN 3
+												ELSE 4
+											END
+		,npsas.[Hrs ' + @curYearString + '2] = ISNULL(hrs' + @curYearString + '2.Hrs, 0)
+		,npsas.[Enrollment Status ' + @curYearString + '3] = CASE
+												WHEN hrs' + @curYearString + '3.Hrs IS NULL THEN 0
+												WHEN hrs' + @curYearString + '3.Hrs = 0 THEN 0
+												WHEN hrs' + @curYearString + '3.Hrs >= 12 THEN 1
+												WHEN hrs' + @curYearString + '3.Hrs >= 9 THEN 2
+												WHEN hrs' + @curYearString + '3.Hrs >= 6 THEN 3
+												ELSE 4
+											END
+		,npsas.[Hrs ' + @curYearString + '3] = ISNULL(hrs' + @curYearString + '3.Hrs, 0)
+		,npsas.[Class_Level ' + @academicYear + '] = ISNULL(case 
+													when clstatus.[TRM_CLASS] = ''FR'' then 1
+													when clstatus.[TRM_CLASS] = ''SO'' then 2
+													when clstatus.[TRM_CLASS] = ''JR'' then 3
+													when clstatus.[TRM_CLASS] = ''SR'' then 4
+													when calc.[T1_DE1012_CLASS_LEVEL] in (''1'',''2'',''3'',''4'',''6'') then CAST(calc.[T1_DE1012_CLASS_LEVEL] AS INT)
+												END, -1)
+FROM
+	#t2 npsas
+	LEFT JOIN (SELECT
 					class.STDNT_ID
 					,MAX(class.CRS_ID) AS CRS_ID
-			FROM
-				MIS.dbo.ST_STDNT_CLS_A_235 class
-			WHERE
-				LEFT(class.EFF_TRM, 4) = '2012'
-			GROUP BY
-				class.STDNT_ID) class2012 ON class2012.STDNT_ID = main.[Student ID]
-  LEFT JOIN (SELECT
-				*
-				,ROW_NUMBER() OVER (PARTITION BY obj.STDNT_ID ORDER BY obj.EFF_TERM DESC) RN
-			FROM
-				MIS.dbo.ST_STDNT_OBJ_AWD_A_178 obj
-			WHERE
-				PGM_STAT <> 'IN'
-				AND ADMT_STAT = 'Y'
-				AND PRIM_FLG = '1') lstdeggranted ON lstdeggranted.STDNT_ID = main.[Student ID]
-										          AND lstdeggranted.RN = 1
-  --WHERE OBJ.STDNT_ID IS NULL AND obj_prim.STDNT_ID IS NULL AND obj_gr.STDNT_ID is null
-ORDER BY
-	[Case ID]
+				FROM
+					MIS.dbo.ST_STDNT_CLS_A_235 class
+					INNER JOIN MIS.dbo.ST_ACDMC_HIST_A_154 hist ON hist.REF_NUM = class.REF_NUM
+				WHERE
+					LEFT(class.EFF_TRM, 4) = ''' + @curYearString + '''
+					AND LEFT(hist.CLASS_KEY, 1) NOT IN (''B'', ''M'')
+				GROUP BY
+					class.STDNT_ID) class' + @curYearString + ' ON class' + @curYearString + '.STDNT_ID = npsas.SSN
+	LEFT JOIN (SELECT
+					obj.*
+					,ROW_NUMBER() OVER (PARTITION BY obj.STDNT_ID ORDER BY d.DEGRANK ASC) RN
+				FROM
+					MIS.dbo.ST_STDNT_OBJ_AWD_A_178 obj
+					INNER JOIN #degrank d ON d.AWD_TYPE = obj.AWD_TYPE
+				WHERE
+					obj.EFF_TERM < ''' + @nextYearString + '1''
+					AND obj.PGM_STAT IN (''GR'', ''AC'')
+					AND obj.ADMT_STAT = ''Y'') deg' + @curYearString + ' ON deg' + @curYearString + '.STDNT_ID = npsas.SSN
+													                     AND deg' + @curYearString + '.RN = 1
+	LEFT JOIN MIS.dbo.ST_PROGRAMS_A_136 prog ON prog.PGM_CD = deg' + @curYearString + '.PGM_ID
+											 AND prog.EFF_TRM_D <= deg' + @curYearString + '.EFF_TERM
+											 AND prog.END_TRM >= deg' + @curYearString + '.EFF_TERM
+											 AND prog.EFF_TRM_D <> ''''
+	LEFT JOIN (SELECT
+					*
+					,ROW_NUMBER() OVER (PARTITION BY SID ORDER BY TERM ASC) RN
+				FROM
+					MIS.dbo.SR_GPA_CALC_604) calc ON calc.SID = npsas.SSN
+												  AND calc.TERM BETWEEN ''' + @curYearString + '1'' AND ''' + @curYearString + '3''
+												  AND calc.RN = 1
+	LEFT JOIN (SELECT
+					fees.stdntId
+					,xwalk.AcademicYear
+					,SUM(fees.FEE_ASSESS_AMOUNT) AS [Amount]
+				FROM
+					[MIS].[dbo].[IT_STUDENT_FEES_A_145] fees
+					INNER JOIN MIS.dbo.vwTermYearXwalk xwalk ON xwalk.OrionTerm = fees.trmYr
+				GROUP BY
+					fees.stdntId
+					,xwalk.AcademicYear) fees ON fees.stdntId = npsas.SSN
+											  AND fees.AcademicYear = ''' + @academicYear + '''
+	LEFT JOIN (SELECT
+					*
+					,ROW_NUMBER() OVER (PARTITION BY term.STDNT_ID ORDER BY TRM_YR ASC) RN
+				FROM
+					MIS.dbo.ST_STDNT_TERM_A_236 term
+				WHERE
+					LEFT(term.TRM_YR, 4) = ''' + @curYearString + ''') resterm ON resterm.STDNT_ID = npsas.SSN
+														                       AND resterm.RN = 1
+	LEFT JOIN (SELECT
+					class.STDNT_ID
+					,class.EFF_TRM
+					,SUM(CASE
+						WHEN class.CRED_TY IN (''01'',''02'',''03'',''14'',''15'') THEN course.EVAL_CRED_HRS
+						ELSE course.CNTCT_HRS / 30.0
+					END) AS Hrs
+				FROM
+					MIS.dbo.ST_STDNT_CLS_A_235 class
+					INNER JOIN MIS.dbo.ST_CLASS_A_151 course ON course.REF_NUM = class.REF_NUM
+				GROUP BY
+					class.STDNT_ID
+					,class.EFF_TRM) hrs' + @curYearString + '1 ON hrs' + @curYearString + '1.STDNT_ID = npsas.SSN
+										                       AND hrs' + @curYearString + '1.EFF_TRM = ''' + @curYearString + '1''
+	LEFT JOIN (SELECT
+					class.STDNT_ID
+					,class.EFF_TRM
+					,SUM(CASE
+						WHEN class.CRED_TY IN (''01'',''02'',''03'',''14'',''15'') THEN course.EVAL_CRED_HRS
+						ELSE course.CNTCT_HRS / 30.0
+					END) AS Hrs
+				FROM
+					MIS.dbo.ST_STDNT_CLS_A_235 class
+					INNER JOIN MIS.dbo.ST_CLASS_A_151 course ON course.REF_NUM = class.REF_NUM
+				GROUP BY
+					class.STDNT_ID
+					,class.EFF_TRM) hrs' + @curYearString + '2 ON hrs' + @curYearString + '2.STDNT_ID = npsas.SSN
+															   AND hrs' + @curYearString + '2.EFF_TRM = ''' + @curYearString + '2''
+	LEFT JOIN (SELECT
+					class.STDNT_ID
+					,class.EFF_TRM
+					,SUM(CASE
+						WHEN class.CRED_TY IN (''01'',''02'',''03'',''14'',''15'') THEN course.EVAL_CRED_HRS
+						ELSE course.CNTCT_HRS / 30.0
+					END) AS Hrs
+				FROM
+					MIS.dbo.ST_STDNT_CLS_A_235 class
+					INNER JOIN MIS.dbo.ST_CLASS_A_151 course ON course.REF_NUM = class.REF_NUM
+				GROUP BY
+					class.STDNT_ID
+					,class.EFF_TRM) hrs' + @curYearString + '3 ON hrs' + @curYearString + '3.STDNT_ID = npsas.SSN
+										                       AND hrs' + @curYearString + '3.EFF_TRM = ''' + @curYearString + '3''
+	LEFT JOIN (SELECT
+					*
+					,ROW_NUMBER() OVER (PARTITION BY STUDENT_ID, ACADEMIC_YEAR ORDER BY deg.DEGRANK) RN
+				FROM
+					MIS.dbo.IT_FREEZE_POINT_A_116 freeze
+					INNER JOIN #degrank deg ON deg.AWD_TYPE = freeze.TRM_DEGREE) clstatus ON clstatus.STUDENT_ID = npsas.SSN
+																						  AND clstatus.ACADEMIC_YEAR = ' + @curYearString + '
+																						  AND clstatus.RN = 1')
+
+	SET @curYear = @curYear + 1
+
+END
+
+	
+SELECT
+	*
+FROM
+	#t2
