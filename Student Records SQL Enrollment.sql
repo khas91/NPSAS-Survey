@@ -85,156 +85,156 @@ SELECT
 	,ISNULL(sat_crit.TST_SCR, 0) AS [SAT_Crit_Score]
 	,ISNULL(sat_math.TST_SCR, 0) AS [SAT_Math_Score]
 	,ISNULL(sat_wri.TST_SCR, 0) AS [SAT_Writing_Score]
-	,0 AS [Attended 2011-12]
-	,0 AS [prog 2011-12]
-	,'' AS [Grad Degree 2011-12]
-	,0 AS [Class_Level 2011-12]
-	,0 AS [Deg_Compl_mm 2011-12]
-	,0 AS [Deg_Compl_dd 2011-12]
-	,0 AS [Deg_Compl_yyyy 2011-12]
-	,0 AS [Cumm GPA 2011-12]
-	,'' AS [First_Major 2011-12]
-	,'' AS [First_Major_CIP 2011-12]
-	,'' AS [Second_Major 2011-12]
-	,'' AS [Second_Major_CIP 2011-12]
-	,'' AS [Undeclared 2011-12]
-	,0 AS [Total Reqd Clock Hours 2011-12]
-	,0 AS [Total Cmpltd Clock Hours 2011-12]
-	,0 AS [Total Reqd Credit Hours 2011-12]
-	,0 AS [Total Cmpltd Credit Hours 2011-12]
-	,0 AS [Total Fees charged 2011-12]
-	,0 AS [Res for Tuition 2011-12]
-	,0 AS [Enrollment Status 20121]
-	,0 AS [Hrs 20121]
-	,0 AS [Enrollment Status 20122]
-	,0 AS [Hrs 20122]
-	,0 AS [Enrollment Status 20123]
-	,0 AS [Hrs 20123]
-	,0 AS [Attended 2012-13]
-	,0 AS [prog 2012-13]
-	,'' AS [Grad Degree 2012-13]
-	,0 AS [Class_Level 2012-13]
-	,0 AS [Deg_Compl_mm 2012-13]
-	,0 AS [Deg_Compl_dd 2012-13]
-	,0 AS [Deg_Compl_yyyy 2012-13]
-	,0 AS [Cumm GPA 2012-13]
-	,'' AS [First_Major 2012-13]
-	,'' AS [First_Major_CIP 2012-13]
-	,'' AS [Second_Major 2012-13]
-	,'' AS [Second_Major_CIP 2012-13]
-	,'' AS [Undeclared 2012-13]
-	,0 AS [Total Reqd Clock Hours 2012-13]
-	,0 AS [Total Cmpltd Clock Hours 2012-13]
-	,0 AS [Total Reqd Credit Hours 2012-13]
-	,0 AS [Total Cmpltd Credit Hours 2012-13]
-	,0 AS [Total Fees charged 2012-13]
-	,0 AS [Res for Tuition 2012-13]
-	,0 AS [Enrollment Status 20131]
-	,0 AS [Hrs 20131]
-	,0 AS [Enrollment Status 20132]
-	,0 AS [Hrs 20132]
-	,0 AS [Enrollment Status 20133]
-	,0 AS [Hrs 20133]
-	,0 AS [Attended 2013-14]
-	,0 AS [prog 2013-14]
-	,'' AS [Grad Degree 2013-14]
-	,0 AS [Class_Level 2013-14]
-	,0 AS [Deg_Compl_mm 2013-14]
-	,0 AS [Deg_Compl_dd 2013-14]
-	,0 AS [Deg_Compl_yyyy 2013-14]
-	,0 AS [Cumm GPA 2013-14]
-	,'' AS [First_Major 2013-14]
-	,'' AS [First_Major_CIP 2013-14]
-	,'' AS [Second_Major 2013-14]
-	,'' AS [Second_Major_CIP 2013-14]
-	,'' AS [Undeclared 2013-14]
-	,0 AS [Total Reqd Clock Hours 2013-14]
-	,0 AS [Total Cmpltd Clock Hours 2013-14]
-	,0 AS [Total Reqd Credit Hours 2013-14]
-	,0 AS [Total Cmpltd Credit Hours 2013-14]
-	,0 AS [Total Fees charged 2013-14]
-	,0 AS [Res for Tuition 2013-14]
-	,0 AS [Enrollment Status 20141]
-	,0 AS [Hrs 20141]
-	,0 AS [Enrollment Status 20142]
-	,0 AS [Hrs 20142]
-	,0 AS [Enrollment Status 20143]
-	,0 AS [Hrs 20143]
-	,0 AS [Attended 2014-15]
-	,0 AS [prog 2014-15]
-	,'' AS [Grad Degree 2014-15]
-	,0 AS [Class_Level 2014-15]
-	,0 AS [Deg_Compl_mm 2014-15]
-	,0 AS [Deg_Compl_dd 2014-15]
-	,0 AS [Deg_Compl_yyyy 2014-15]
-	,0 AS [Cumm GPA 2014-15]
-	,'' AS [First_Major 2014-15]
-	,'' AS [First_Major_CIP 2014-15]
-	,'' AS [Second_Major 2014-15]
-	,'' AS [Second_Major_CIP 2014-15]
-	,'' AS [Undeclared 2014-15]
-	,0 AS [Total Reqd Clock Hours 2014-15]
-	,0 AS [Total Cmpltd Clock Hours 2014-15]
-	,0 AS [Total Reqd Credit Hours 2014-15]
-	,0 AS [Total Cmpltd Credit Hours 2014-15]
-	,0 AS [Total Fees charged 2014-15]
-	,0 AS [Res for Tuition 2014-15]
-	,0 AS [Enrollment Status 20151]
-	,0 AS [Hrs 20151]
-	,0 AS [Enrollment Status 20152]
-	,0 AS [Hrs 20152]
-	,0 AS [Enrollment Status 20153]
-	,0 AS [Hrs 20153]
-	,0 AS [Attended 2015-16]
-	,0 AS [prog 2015-16]
-	,'' AS [Grad Degree 2015-16]
-	,0 AS [Class_Level 2015-16]
-	,0 AS [Deg_Compl_mm 2015-16]
-	,0 AS [Deg_Compl_dd 2015-16]
-	,0 AS [Deg_Compl_yyyy 2015-16]
-	,0 AS [Cumm GPA 2015-16]
-	,'' AS [First_Major 2015-16]
-	,'' AS [First_Major_CIP 2015-16]
-	,'' AS [Second_Major 2015-16]
-	,'' AS [Second_Major_CIP 2015-16]
-	,'' AS [Undeclared 2015-16]
-	,0 AS [Total Reqd Clock Hours 2015-16]
-	,0 AS [Total Cmpltd Clock Hours 2015-16]
-	,0 AS [Total Reqd Credit Hours 2015-16]
-	,0 AS [Total Cmpltd Credit Hours 2015-16]
-	,0 AS [Total Fees charged 2015-16]
-	,0 AS [Res for Tuition 2015-16]
-	,0 AS [Enrollment Status 20161]
-	,0 AS [Hrs 20161]
-	,0 AS [Enrollment Status 20162]
-	,0 AS [Hrs 20162]
-	,0 AS [Enrollment Status 20163]
-	,0 AS [Hrs 20163]
-	,0 AS [Attended 2016-17]
-	,0 AS [prog 2016-17]
-	,'' AS [Grad Degree 2016-17]
-	,0 AS [Class_Level 2016-17]
-	,0 AS [Deg_Compl_mm 2016-17]
-	,0 AS [Deg_Compl_dd 2016-17]
-	,0 AS [Deg_Compl_yyyy 2016-17]
-	,0 AS [Cumm GPA 2016-17]
-	,'' AS [First_Major 2016-17]
-	,'' AS [First_Major_CIP 2016-17]
-	,'' AS [Second_Major 2016-17]
-	,'' AS [Second_Major_CIP 2016-17]
-	,'' AS [Undeclared 2016-17]
-	,0 AS [Total Reqd Clock Hours 2016-17]
-	,0 AS [Total Cmpltd Clock Hours 2016-17]
-	,0 AS [Total Reqd Credit Hours 2016-17]
-	,0 AS [Total Cmpltd Credit Hours 2016-17]
-	,0 AS [Total Fees charged 2016-17]
-	,0 AS [Res for Tuition 2016-17]
-	,0 AS [Enrollment Status 20171]
-	,0 AS [Hrs 20171]
-	,0 AS [Enrollment Status 20172]
-	,0 AS [Hrs 20172]
-	,0 AS [Enrollment Status 20173]
-	,0 AS [Hrs 20173]
+	,CAST('' AS VARCHAR(MAX)) AS [Attended 2011-12]
+	,CAST('' AS VARCHAR(MAX)) AS [prog 2011-12]
+	,CAST('' AS VARCHAR(MAX)) AS [Grad Degree 2011-12]
+	,CAST('' AS VARCHAR(MAX)) AS [Class_Level 2011-12]
+	,CAST('' AS VARCHAR(MAX)) AS [Deg_Compl_mm 2011-12]
+	,CAST('' AS VARCHAR(MAX)) AS [Deg_Compl_dd 2011-12]
+	,CAST('' AS VARCHAR(MAX)) AS [Deg_Compl_yyyy 2011-12]
+	,CAST('' AS VARCHAR(MAX)) AS [Cumm GPA 2011-12]
+	,CAST('' AS VARCHAR(MAX)) AS [First_Major 2011-12]
+	,CAST('' AS VARCHAR(MAX)) AS [First_Major_CIP 2011-12]
+	,CAST('' AS VARCHAR(MAX)) AS [Second_Major 2011-12]
+	,CAST('' AS VARCHAR(MAX)) AS [Second_Major_CIP 2011-12]
+	,CAST('' AS VARCHAR(MAX)) AS [Undeclared 2011-12]
+	,CAST('' AS VARCHAR(MAX)) AS [Total Reqd Clock Hours 2011-12]
+	,CAST('' AS VARCHAR(MAX)) AS [Total Cmpltd Clock Hours 2011-12]
+	,CAST('' AS VARCHAR(MAX)) AS [Total Reqd Credit Hours 2011-12]
+	,CAST('' AS VARCHAR(MAX)) AS [Total Cmpltd Credit Hours 2011-12]
+	,CAST('' AS VARCHAR(MAX)) AS [Total Fees charged 2011-12]
+	,CAST('' AS VARCHAR(MAX)) AS [Res for Tuition 2011-12]
+	,CAST('' AS VARCHAR(MAX)) AS [Enrollment Status 20121]
+	,CAST('' AS VARCHAR(MAX)) AS [Hrs 20121]
+	,CAST('' AS VARCHAR(MAX)) AS [Enrollment Status 20122]
+	,CAST('' AS VARCHAR(MAX)) AS [Hrs 20122]
+	,CAST('' AS VARCHAR(MAX)) AS [Enrollment Status 20123]
+	,CAST('' AS VARCHAR(MAX)) AS [Hrs 20123]
+	,CAST('' AS VARCHAR(MAX)) AS [Attended 2012-13]
+	,CAST('' AS VARCHAR(MAX)) AS [prog 2012-13]
+	,CAST('' AS VARCHAR(MAX)) AS [Grad Degree 2012-13]
+	,CAST('' AS VARCHAR(MAX)) AS [Class_Level 2012-13]
+	,CAST('' AS VARCHAR(MAX)) AS [Deg_Compl_mm 2012-13]
+	,CAST('' AS VARCHAR(MAX)) AS [Deg_Compl_dd 2012-13]
+	,CAST('' AS VARCHAR(MAX)) AS [Deg_Compl_yyyy 2012-13]
+	,CAST('' AS VARCHAR(MAX)) AS [Cumm GPA 2012-13]
+	,CAST('' AS VARCHAR(MAX)) AS [First_Major 2012-13]
+	,CAST('' AS VARCHAR(MAX)) AS [First_Major_CIP 2012-13]
+	,CAST('' AS VARCHAR(MAX)) AS [Second_Major 2012-13]
+	,CAST('' AS VARCHAR(MAX)) AS [Second_Major_CIP 2012-13]
+	,CAST('' AS VARCHAR(MAX)) AS [Undeclared 2012-13]
+	,CAST('' AS VARCHAR(MAX)) AS [Total Reqd Clock Hours 2012-13]
+	,CAST('' AS VARCHAR(MAX)) AS [Total Cmpltd Clock Hours 2012-13]
+	,CAST('' AS VARCHAR(MAX)) AS [Total Reqd Credit Hours 2012-13]
+	,CAST('' AS VARCHAR(MAX)) AS [Total Cmpltd Credit Hours 2012-13]
+	,CAST('' AS VARCHAR(MAX)) AS [Total Fees charged 2012-13]
+	,CAST('' AS VARCHAR(MAX)) AS [Res for Tuition 2012-13]
+	,CAST('' AS VARCHAR(MAX)) AS [Enrollment Status 20131]
+	,CAST('' AS VARCHAR(MAX)) AS [Hrs 20131]
+	,CAST('' AS VARCHAR(MAX)) AS [Enrollment Status 20132]
+	,CAST('' AS VARCHAR(MAX)) AS [Hrs 20132]
+	,CAST('' AS VARCHAR(MAX)) AS [Enrollment Status 20133]
+	,CAST('' AS VARCHAR(MAX)) AS [Hrs 20133]
+	,CAST('' AS VARCHAR(MAX)) AS [Attended 2013-14]
+	,CAST('' AS VARCHAR(MAX)) AS [prog 2013-14]
+	,CAST('' AS VARCHAR(MAX)) AS [Grad Degree 2013-14]
+	,CAST('' AS VARCHAR(MAX)) AS [Class_Level 2013-14]
+	,CAST('' AS VARCHAR(MAX)) AS [Deg_Compl_mm 2013-14]
+	,CAST('' AS VARCHAR(MAX)) AS [Deg_Compl_dd 2013-14]
+	,CAST('' AS VARCHAR(MAX)) AS [Deg_Compl_yyyy 2013-14]
+	,CAST('' AS VARCHAR(MAX)) AS [Cumm GPA 2013-14]
+	,CAST('' AS VARCHAR(MAX)) AS [First_Major 2013-14]
+	,CAST('' AS VARCHAR(MAX)) AS [First_Major_CIP 2013-14]
+	,CAST('' AS VARCHAR(MAX)) AS [Second_Major 2013-14]
+	,CAST('' AS VARCHAR(MAX)) AS [Second_Major_CIP 2013-14]
+	,CAST('' AS VARCHAR(MAX)) AS [Undeclared 2013-14]
+	,CAST('' AS VARCHAR(MAX)) AS [Total Reqd Clock Hours 2013-14]
+	,CAST('' AS VARCHAR(MAX)) AS [Total Cmpltd Clock Hours 2013-14]
+	,CAST('' AS VARCHAR(MAX)) AS [Total Reqd Credit Hours 2013-14]
+	,CAST('' AS VARCHAR(MAX)) AS [Total Cmpltd Credit Hours 2013-14]
+	,CAST('' AS VARCHAR(MAX)) AS [Total Fees charged 2013-14]
+	,CAST('' AS VARCHAR(MAX)) AS [Res for Tuition 2013-14]
+	,CAST('' AS VARCHAR(MAX)) AS [Enrollment Status 20141]
+	,CAST('' AS VARCHAR(MAX)) AS [Hrs 20141]
+	,CAST('' AS VARCHAR(MAX)) AS [Enrollment Status 20142]
+	,CAST('' AS VARCHAR(MAX)) AS [Hrs 20142]
+	,CAST('' AS VARCHAR(MAX)) AS [Enrollment Status 20143]
+	,CAST('' AS VARCHAR(MAX)) AS [Hrs 20143]
+	,CAST('' AS VARCHAR(MAX)) AS [Attended 2014-15]
+	,CAST('' AS VARCHAR(MAX)) AS [prog 2014-15]
+	,CAST('' AS VARCHAR(MAX)) AS [Grad Degree 2014-15]
+	,CAST('' AS VARCHAR(MAX)) AS [Class_Level 2014-15]
+	,CAST('' AS VARCHAR(MAX)) AS [Deg_Compl_mm 2014-15]
+	,CAST('' AS VARCHAR(MAX)) AS [Deg_Compl_dd 2014-15]
+	,CAST('' AS VARCHAR(MAX)) AS [Deg_Compl_yyyy 2014-15]
+	,CAST('' AS VARCHAR(MAX)) AS [Cumm GPA 2014-15]
+	,CAST('' AS VARCHAR(MAX)) AS [First_Major 2014-15]
+	,CAST('' AS VARCHAR(MAX)) AS [First_Major_CIP 2014-15]
+	,CAST('' AS VARCHAR(MAX)) AS [Second_Major 2014-15]
+	,CAST('' AS VARCHAR(MAX)) AS [Second_Major_CIP 2014-15]
+	,CAST('' AS VARCHAR(MAX)) AS [Undeclared 2014-15]
+	,CAST('' AS VARCHAR(MAX)) AS [Total Reqd Clock Hours 2014-15]
+	,CAST('' AS VARCHAR(MAX)) AS [Total Cmpltd Clock Hours 2014-15]
+	,CAST('' AS VARCHAR(MAX)) AS [Total Reqd Credit Hours 2014-15]
+	,CAST('' AS VARCHAR(MAX)) AS [Total Cmpltd Credit Hours 2014-15]
+	,CAST('' AS VARCHAR(MAX)) AS [Total Fees charged 2014-15]
+	,CAST('' AS VARCHAR(MAX)) AS [Res for Tuition 2014-15]
+	,CAST('' AS VARCHAR(MAX)) AS [Enrollment Status 20151]
+	,CAST('' AS VARCHAR(MAX)) AS [Hrs 20151]
+	,CAST('' AS VARCHAR(MAX)) AS [Enrollment Status 20152]
+	,CAST('' AS VARCHAR(MAX)) AS [Hrs 20152]
+	,CAST('' AS VARCHAR(MAX)) AS [Enrollment Status 20153]
+	,CAST('' AS VARCHAR(MAX)) AS [Hrs 20153]
+	,CAST('' AS VARCHAR(MAX)) AS [Attended 2015-16]
+	,CAST('' AS VARCHAR(MAX)) AS [prog 2015-16]
+	,CAST('' AS VARCHAR(MAX)) AS [Grad Degree 2015-16]
+	,CAST('' AS VARCHAR(MAX)) AS [Class_Level 2015-16]
+	,CAST('' AS VARCHAR(MAX)) AS [Deg_Compl_mm 2015-16]
+	,CAST('' AS VARCHAR(MAX)) AS [Deg_Compl_dd 2015-16]
+	,CAST('' AS VARCHAR(MAX)) AS [Deg_Compl_yyyy 2015-16]
+	,CAST('' AS VARCHAR(MAX)) AS [Cumm GPA 2015-16]
+	,CAST('' AS VARCHAR(MAX)) AS [First_Major 2015-16]
+	,CAST('' AS VARCHAR(MAX)) AS [First_Major_CIP 2015-16]
+	,CAST('' AS VARCHAR(MAX)) AS [Second_Major 2015-16]
+	,CAST('' AS VARCHAR(MAX)) AS [Second_Major_CIP 2015-16]
+	,CAST('' AS VARCHAR(MAX)) AS [Undeclared 2015-16]
+	,CAST('' AS VARCHAR(MAX)) AS [Total Reqd Clock Hours 2015-16]
+	,CAST('' AS VARCHAR(MAX)) AS [Total Cmpltd Clock Hours 2015-16]
+	,CAST('' AS VARCHAR(MAX)) AS [Total Reqd Credit Hours 2015-16]
+	,CAST('' AS VARCHAR(MAX)) AS [Total Cmpltd Credit Hours 2015-16]
+	,CAST('' AS VARCHAR(MAX)) AS [Total Fees charged 2015-16]
+	,CAST('' AS VARCHAR(MAX)) AS [Res for Tuition 2015-16]
+	,CAST('' AS VARCHAR(MAX)) AS [Enrollment Status 20161]
+	,CAST('' AS VARCHAR(MAX)) AS [Hrs 20161]
+	,CAST('' AS VARCHAR(MAX)) AS [Enrollment Status 20162]
+	,CAST('' AS VARCHAR(MAX)) AS [Hrs 20162]
+	,CAST('' AS VARCHAR(MAX)) AS [Enrollment Status 20163]
+	,CAST('' AS VARCHAR(MAX)) AS [Hrs 20163]
+	,CAST('' AS VARCHAR(MAX)) AS [Attended 2016-17]
+	,CAST('' AS VARCHAR(MAX)) AS [prog 2016-17]
+	,CAST('' AS VARCHAR(MAX)) AS [Grad Degree 2016-17]
+	,CAST('' AS VARCHAR(MAX)) AS [Class_Level 2016-17]
+	,CAST('' AS VARCHAR(MAX)) AS [Deg_Compl_mm 2016-17]
+	,CAST('' AS VARCHAR(MAX)) AS [Deg_Compl_dd 2016-17]
+	,CAST('' AS VARCHAR(MAX)) AS [Deg_Compl_yyyy 2016-17]
+	,CAST('' AS VARCHAR(MAX)) AS [Cumm GPA 2016-17]
+	,CAST('' AS VARCHAR(MAX)) AS [First_Major 2016-17]
+	,CAST('' AS VARCHAR(MAX)) AS [First_Major_CIP 2016-17]
+	,CAST('' AS VARCHAR(MAX)) AS [Second_Major 2016-17]
+	,CAST('' AS VARCHAR(MAX)) AS [Second_Major_CIP 2016-17]
+	,CAST('' AS VARCHAR(MAX)) AS [Undeclared 2016-17]
+	,CAST('' AS VARCHAR(MAX)) AS [Total Reqd Clock Hours 2016-17]
+	,CAST('' AS VARCHAR(MAX)) AS [Total Cmpltd Clock Hours 2016-17]
+	,CAST('' AS VARCHAR(MAX)) AS [Total Reqd Credit Hours 2016-17]
+	,CAST('' AS VARCHAR(MAX)) AS [Total Cmpltd Credit Hours 2016-17]
+	,CAST('' AS VARCHAR(MAX)) AS [Total Fees charged 2016-17]
+	,CAST('' AS VARCHAR(MAX)) AS [Res for Tuition 2016-17]
+	,CAST('' AS VARCHAR(MAX)) AS [Enrollment Status 20171]
+	,CAST('' AS VARCHAR(MAX)) AS [Hrs 20171]
+	,CAST('' AS VARCHAR(MAX)) AS [Enrollment Status 20172]
+	,CAST('' AS VARCHAR(MAX)) AS [Hrs 20172]
+	,CAST('' AS VARCHAR(MAX)) AS [Enrollment Status 20173]
+	,CAST('' AS VARCHAR(MAX)) AS [Hrs 20173]
 INTO
 	#t2
 FROM
@@ -376,87 +376,101 @@ EXECUTE('
 UPDATE npsas
 	SET 
 		npsas.[Attended ' + @academicYear + '] = CASE
-										WHEN class' + @curYearString + '.STDNT_ID IS NOT NULL THEN 1
-										ELSE 0
+										WHEN class' + @curYearString + '.STDNT_ID IS NOT NULL THEN ''1''
+										ELSE ''0''
 									END
 		,npsas.[prog ' + @academicYear + '] =  CASE
-										WHEN deg' + @curYearString + '.AWD_TYPE = ''ND'' THEN 1
-										WHEN deg' + @curYearString + '.AWD_TYPE = ''TC'' THEN 2
-										WHEN LEFT(deg' + @curYearString + '.AWD_TYPE, 1) = ''A'' THEN 3
-										WHEN LEFT(deg' + @curYearString + '.AWD_TYPE, 1) = ''B'' THEN 4
+										WHEN class' + @curYearString + '.STDNT_ID IS NULL THEN ''''
+										WHEN deg' + @curYearString + '.AWD_TYPE = ''ND'' THEN ''1''
+										WHEN deg' + @curYearString + '.AWD_TYPE = ''TC'' THEN ''2''
+										WHEN LEFT(deg' + @curYearString + '.AWD_TYPE, 1) = ''A'' THEN ''3''
+										WHEN LEFT(deg' + @curYearString + '.AWD_TYPE, 1) = ''B'' THEN ''4''
 										ELSE 0
 									END
 		,npsas.[Deg_Compl_mm ' + @academicYear + '] = CASE
-											WHEN deg' + @curYearString + '.PGM_ID IS NULL THEN 0
-											WHEN deg' + @curYearString + '.ACT_GRAD_TRM = '''' THEN 0
+											WHEN class' + @curYearString + '.STDNT_ID IS NULL THEN ''''
+											WHEN deg' + @curYearString + '.PGM_ID IS NULL THEN ''0''
+											WHEN deg' + @curYearString + '.ACT_GRAD_TRM = '''' THEN ''0''
 											ELSE SUBSTRING(deg' + @curYearString + '.ACT_GRAD_DT, 5, 2)
 										END
 		,npsas.[Deg_Compl_dd ' + @academicYear + '] = CASE
-											WHEN deg' + @curYearString + '.PGM_ID IS NULL THEN 0
-											WHEN deg' + @curYearString + '.ACT_GRAD_TRM = '''' THEN 0
+											WHEN class' + @curYearString + '.STDNT_ID IS NULL THEN ''''
+											WHEN deg' + @curYearString + '.PGM_ID IS NULL THEN ''0''
+											WHEN deg' + @curYearString + '.ACT_GRAD_TRM = '''' THEN ''0''
 											ELSE RIGHT(deg' + @curYearString + '.ACT_GRAD_DT, 2)
 										END
 		,npsas.[Deg_Compl_yyyy ' + @academicYear + '] = CASE
-											WHEN deg' + @curYearString + '.PGM_ID IS NULL THEN 0
-											WHEN deg' + @curYearString + '.ACT_GRAD_TRM = '''' THEN 0
+											WHEN class' + @curYearString + '.STDNT_ID IS NULL THEN ''''
+											WHEN deg' + @curYearString + '.PGM_ID IS NULL THEN ''0''
+											WHEN deg' + @curYearString + '.ACT_GRAD_TRM = '''' THEN ''0''
 											ELSE LEFT(deg' + @curYearString + '.ACT_GRAD_DT, 4)
 										END
 		,npsas.[Total Reqd Clock Hours ' + @academicYear + '] = CASE
-														WHEN prog.PGM_TTL_MIN_CNTCT_HRS_REQD > 0 THEN prog.PGM_TTL_MIN_CNTCT_HRS_REQD
-														ELSE 0
+														WHEN class' + @curYearString + '.STDNT_ID IS NULL THEN ''''
+														WHEN prog.PGM_TTL_MIN_CNTCT_HRS_REQD > 0 THEN CAST(prog.PGM_TTL_MIN_CNTCT_HRS_REQD AS VARCHAR)
+														ELSE ''0''
 													END
 		,npsas.[Total Cmpltd Clock Hours ' + @academicYear + '] = CASE
-														WHEN prog.PGM_TTL_MIN_CNTCT_HRS_REQD > 0 THEN ISNULL(calc.T1_DE1024_TRM_CLOCK_HRS_EARNED, 0)
-														ELSE 0
+														WHEN class' + @curYearString + '.STDNT_ID IS NULL THEN ''''
+														WHEN prog.PGM_TTL_MIN_CNTCT_HRS_REQD > 0 THEN ISNULL(CAST(calc.T1_DE1024_TRM_CLOCK_HRS_EARNED AS VARCHAR), ''0'')
+														ELSE ''0''
 													END
 		,npsas.[Total Reqd Credit Hours ' + @academicYear + '] = CASE
-														WHEN prog.PGM_TTL_CRD_HRS > 0 THEN prog.PGM_TTL_CRD_HRS
-														ELSE 0
+														WHEN class' + @curYearString + '.STDNT_ID IS NULL THEN ''''
+														WHEN prog.PGM_TTL_CRD_HRS > 0 THEN CAST(prog.PGM_TTL_CRD_HRS AS VARCHAR)
+														ELSE ''0''
 													END
 		,npsas.[Total Cmpltd Credit Hours ' + @academicYear + '] = CASE
-														WHEN prog.PGM_TTL_CRD_HRS > 0 THEN ISNULL(calc.T1_DE1025_TRM_CREDIT_HRS_EARNED, 0)
-														ELSE 0
+														WHEN class' + @curYearString + '.STDNT_ID IS NULL THEN ''''
+														WHEN prog.PGM_TTL_CRD_HRS > 0 THEN ISNULL(CAST(calc.T1_DE1025_TRM_CREDIT_HRS_EARNED AS VARCHAR), ''0'')
+														ELSE ''0''
 													END
-		,npsas.[Total Fees charged ' + @academicYear + '] = ISNULL(fees.Amount, 0)
-		,npsas.[Res for Tuition ' + @academicYear + '] = case 
+		,npsas.[Total Fees charged ' + @academicYear + '] = CASE WHEN class' + @curYearString + '.STDNT_ID IS NULL THEN '''' ELSE ISNULL(CAST(fees.Amount AS VARCHAR), ''0'') END
+		,npsas.[Res for Tuition ' + @academicYear + '] = case
+												WHEN class' + @curYearString + '.STDNT_ID IS  NULL THEN '''' 
 												when resterm.[RES_CD] in (''1'',''2'',''3'') then resterm.[RES_CD]
 												when resterm.[RES_CD] in (''4'',''5'') then ''3''
 												else ''-1'' 
 											end
 		,npsas.[Enrollment Status ' + @curYearString + '1] = CASE
-												WHEN hrs' + @curYearString + '1.Hrs IS NULL THEN 0
-												WHEN hrs' + @curYearString + '1.Hrs = 0 THEN 0
-												WHEN hrs' + @curYearString + '1.Hrs >= 12 THEN 1
-												WHEN hrs' + @curYearString + '1.Hrs >= 9 THEN 2
-												WHEN hrs' + @curYearString + '1.Hrs >= 6 THEN 3
-												ELSE 4
+												WHEN class' + @curYearString + '.STDNT_ID IS NULL THEN ''''
+												WHEN hrs' + @curYearString + '1.Hrs IS NULL THEN ''0''
+												WHEN hrs' + @curYearString + '1.Hrs = 0 THEN ''0''
+												WHEN hrs' + @curYearString + '1.Hrs >= 12 THEN ''1''
+												WHEN hrs' + @curYearString + '1.Hrs >= 9 THEN ''2''
+												WHEN hrs' + @curYearString + '1.Hrs >= 6 THEN ''3''
+												ELSE ''4''
 											END
-		,npsas.[Hrs ' + @curYearString + '1] = ISNULL(hrs' + @curYearString + '1.Hrs, 0)
+		,npsas.[Hrs ' + @curYearString + '1] = CASE WHEN class' + @curYearString + '.STDNT_ID IS NULL THEN '''' ELSE ISNULL(CAST(hrs' + @curYearString + '1.Hrs AS VARCHAR), ''0'') END
 		,npsas.[Enrollment Status ' + @curYearString + '2] = CASE
-												WHEN hrs' + @curYearString + '2.Hrs IS NULL THEN 0
-												WHEN hrs' + @curYearString + '2.Hrs = 0 THEN 0
-												WHEN hrs' + @curYearString + '2.Hrs >= 12 THEN 1
-												WHEN hrs' + @curYearString + '2.Hrs >= 9 THEN 2
-												WHEN hrs' + @curYearString + '2.Hrs >= 6 THEN 3
-												ELSE 4
+												WHEN class' + @curYearString + '.STDNT_ID IS  NULL THEN ''''
+												WHEN hrs' + @curYearString + '2.Hrs IS NULL THEN ''0''
+												WHEN hrs' + @curYearString + '2.Hrs = 0 THEN ''0''
+												WHEN hrs' + @curYearString + '2.Hrs >= 12 THEN ''1''
+												WHEN hrs' + @curYearString + '2.Hrs >= 9 THEN ''2''
+												WHEN hrs' + @curYearString + '2.Hrs >= 6 THEN ''3''
+												ELSE ''4''
 											END
-		,npsas.[Hrs ' + @curYearString + '2] = ISNULL(hrs' + @curYearString + '2.Hrs, 0)
+		,npsas.[Hrs ' + @curYearString + '2] = CASE WHEN class' + @curYearString + '.STDNT_ID IS NULL THEN '''' ELSE ISNULL(CAST(hrs' + @curYearString + '2.Hrs AS VARCHAR), ''0'') END
 		,npsas.[Enrollment Status ' + @curYearString + '3] = CASE
-												WHEN hrs' + @curYearString + '3.Hrs IS NULL THEN 0
-												WHEN hrs' + @curYearString + '3.Hrs = 0 THEN 0
-												WHEN hrs' + @curYearString + '3.Hrs >= 12 THEN 1
-												WHEN hrs' + @curYearString + '3.Hrs >= 9 THEN 2
-												WHEN hrs' + @curYearString + '3.Hrs >= 6 THEN 3
-												ELSE 4
+												WHEN class' + @curYearString + '.STDNT_ID IS  NULL THEN ''''
+												WHEN hrs' + @curYearString + '3.Hrs IS NULL THEN ''0''
+												WHEN hrs' + @curYearString + '3.Hrs = 0 THEN ''0''
+												WHEN hrs' + @curYearString + '3.Hrs >= 12 THEN ''1''
+												WHEN hrs' + @curYearString + '3.Hrs >= 9 THEN ''2''
+												WHEN hrs' + @curYearString + '3.Hrs >= 6 THEN ''3''
+												ELSE ''4''
 											END
-		,npsas.[Hrs ' + @curYearString + '3] = ISNULL(hrs' + @curYearString + '3.Hrs, 0)
-		,npsas.[Class_Level ' + @academicYear + '] = ISNULL(case 
-													when clstatus.[TRM_CLASS] = ''FR'' then 1
-													when clstatus.[TRM_CLASS] = ''SO'' then 2
-													when clstatus.[TRM_CLASS] = ''JR'' then 3
-													when clstatus.[TRM_CLASS] = ''SR'' then 4
-													when calc.[T1_DE1012_CLASS_LEVEL] in (''1'',''2'',''3'',''4'',''6'') then CAST(calc.[T1_DE1012_CLASS_LEVEL] AS INT)
-												END, -1)
+		,npsas.[Hrs ' + @curYearString + '3] = CASE WHEN class' + @curYearString + '.STDNT_ID IS NULL THEN '''' ELSE ISNULL(CAST(hrs' + @curYearString + '3.Hrs AS VARCHAR), ''0'') END
+		,npsas.[Class_Level ' + @academicYear + '] = CASE
+													WHEN class' + @curYearString + '.STDNT_ID IS NULL THEN '''' 
+													ELSE ISNULL(case 
+													when clstatus.[TRM_CLASS] = ''FR'' then ''1''
+													when clstatus.[TRM_CLASS] = ''SO'' then ''2''
+													when clstatus.[TRM_CLASS] = ''JR'' then ''3''
+													when clstatus.[TRM_CLASS] = ''SR'' then ''4''
+													when calc.[T1_DE1012_CLASS_LEVEL] in (''1'',''2'',''3'',''4'',''6'') then calc.[T1_DE1012_CLASS_LEVEL]
+												END, ''-1'') END
 FROM
 	#t2 npsas
 	LEFT JOIN (SELECT
@@ -559,7 +573,7 @@ FROM
 				FROM
 					MIS.dbo.IT_FREEZE_POINT_A_116 freeze
 					INNER JOIN #degrank deg ON deg.AWD_TYPE = freeze.TRM_DEGREE) clstatus ON clstatus.STUDENT_ID = npsas.SSN
-																						  AND clstatus.ACADEMIC_YEAR = ' + @curYearString + '
+																						  AND clstatus.ACADEMIC_YEAR = '  + @curYearString + '
 																						  AND clstatus.RN = 1')
 
 	SET @curYear = @curYear + 1
